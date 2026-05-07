@@ -211,3 +211,35 @@
   .login-page__brand { padding: 32px; }
   .login-page__form-panel { width: 100%; padding: 24px; }
 }
+
+/* Input Overrides for White Text and Transparent BG */
+.login-page .dashboard__scan-textarea {
+  color: #ffffff !important;
+  background: transparent !important;
+  border-radius: 0 !important;
+}
+
+.login-page .dashboard__scan-textarea::placeholder {
+  color: rgba(255, 255, 255, 0.4) !important;
+}
+
+/* Autofill handling - making it completely transparent or matching card */
+.login-page .dashboard__scan-textarea:-webkit-autofill,
+.login-page .dashboard__scan-textarea:-webkit-autofill:hover, 
+.login-page .dashboard__scan-textarea:-webkit-autofill:focus,
+.login-page .dashboard__scan-textarea:-webkit-autofill:active {
+  -webkit-text-fill-color: #ffffff !important;
+  -webkit-box-shadow: 0 0 0px 1000px transparent inset !important;
+  background-color: transparent !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+/* Specific fix for the "black box" look */
+.login-page input,
+.login-page input:focus,
+.login-page input:active {
+  background-color: transparent !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
