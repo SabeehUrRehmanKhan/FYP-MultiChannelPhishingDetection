@@ -1,0 +1,57 @@
+# ============================================================
+# PhishGuard Backend — Python Dependencies
+# ============================================================
+
+# Core framework
+fastapi>=0.110.0
+uvicorn[standard]>=0.27.0
+python-multipart>=0.0.9
+
+# Supabase (replaces SQL Server + handles auth)
+supabase>=2.3.0
+
+# Redis (session cache + rate limiting)
+redis>=5.0.1
+
+# Validation & settings
+pydantic>=2.6.0
+pydantic-settings>=2.2.0
+
+# JWT validation (Supabase tokens)
+python-jose[cryptography]>=3.3.0
+
+# HTTP client (for internal service calls)
+httpx>=0.27.0
+
+# Async utilities
+anyio>=4.3.0
+
+# ============================================================
+# ⚠️  MODEL CHANGE POINT — Uncomment when real models are ready
+# ============================================================
+
+# NLP — RoBERTa
+# torch>=2.1.0
+# transformers>=4.38.0
+# tokenizers>=0.15.0
+
+# URL Model — XGBoost + BiLSTM
+# xgboost>=2.0.0
+# numpy>=1.26.0
+# scikit-learn>=1.4.0
+
+# Web Model — Screenshot + pHash + CNN
+# playwright>=1.42.0        # headless browser for screenshots
+# Pillow>=10.2.0            # image processing
+# imagehash>=4.3.1          # perceptual hashing
+
+# Voice Model — Whisper STT
+# openai-whisper>=20231117
+# ffmpeg-python>=0.2.0
+
+# ============================================================
+# Dev dependencies (not needed in production)
+# ============================================================
+# pytest>=8.0.0
+# pytest-asyncio>=0.23.0
+# httpx>=0.27.0              # for TestClient

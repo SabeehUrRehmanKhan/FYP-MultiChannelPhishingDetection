@@ -1,0 +1,28 @@
+.history-page { display: flex; flex-direction: column; gap: 20px; }
+
+.history-page__filters { display: flex; gap: 8px; flex-wrap: wrap; }
+
+.history-page__row { transition: background 0.1s; }
+.history-page__row td:first-child {
+  position: relative;
+  padding-left: 20px;
+}
+.history-page__row--phishing td:first-child::before {
+  content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--neon-red);
+}
+.history-page__row--legitimate td:first-child::before {
+  content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--neon-green);
+}
+.history-page__row--suspicious td:first-child::before {
+  content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--amber);
+}
+.history-page__row--unknown td:first-child::before {
+  content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--outline);
+}
+
+.history-page__input-cell {
+  max-width: 300px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

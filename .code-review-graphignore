@@ -1,0 +1,39 @@
+# .code-review-graphignore  (yeh file project ke root mein honi chahiye)
+
+# Node / Frontend
+node_modules/
+**/node_modules/
+**/dist/
+**/build/
+Frontend/Phishguard/node_modules/
+Frontend/Phishguard/dist/
+
+# Python
+**/.venv/
+**/__pycache__/
+**/*.pyc
+**/*.pyo
+backend/.venv/
+.venv/
+
+# ML Models (bahut badi files hoti hain)
+backend/ML_DL_Models/Bert/
+backend/ML_DL_Models/DeepFake Voice Detection/
+backend/ML_DL_Models/final/
+**/*.pt
+**/*.pth
+**/*.pkl
+**/*.onnx
+**/*.bin
+**/*.h5
+**/*.safetensors
+
+# Misc
+**/*.log
+logs/
+.env
+.code-review-graph/
+.cursor/
+.github/
+.DS_Store
+Thumbs.db

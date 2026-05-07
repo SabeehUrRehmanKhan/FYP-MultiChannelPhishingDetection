@@ -1,0 +1,39 @@
+# === Heavy & Unnecessary Files ===
+
+# ML Models (sabse badi files)
+backend/ML_DL_Models/Bert/
+backend/ML_DL_Models/DeepFake Voice Detection/
+backend/ML_DL_Models/final/
+**/*.pt
+**/*.pth
+**/*.pkl
+**/*.onnx
+**/*.bin
+**/*.h5
+**/*.safetensors
+
+# Node / Frontend
+**/node_modules/
+**/dist/
+**/build/
+Frontend/Phishguard/node_modules/
+Frontend/Phishguard/dist/
+
+# Python
+**/.venv/
+**/__pycache__/
+**/*.pyc
+**/*.pyo
+
+# Tool caches
+.code-review-graph/
+.cursor/
+.github/
+
+# Misc
+logs/
+*.log
+.env
+.DS_Store
+Thumbs.db
+.env.example
