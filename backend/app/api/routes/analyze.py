@@ -59,13 +59,10 @@ async def analysis_stream(
 
         # ── Step 1.5: File Processing (Voice) ────────────────────────
         if file_content:
-            # If we have a file, it's definitely voice/audio
-            # In a real app, we'd run Whisper here. 
-            # For now, we'll use a placeholder transcript or mock
+            # Audio file → route to deepfake voice detection pipeline
             request.type = InputType.voice
-            request.input = "[Audio file uploaded]" # Placeholder for now
-            logger.info(f"Processing audio file ({len(file_content)} bytes)")
-            # TODO: Integrate Whisper here to get real transcript
+            request.input = "[Audio file uploaded for deepfake analysis]"
+            logger.info(f"Processing audio file ({len(file_content)} bytes) → deepfake pipeline")
 
         # ── Step 2: Threat Indicator Pre-Check ───────────────────────
         domains_to_check = []
@@ -125,7 +122,11 @@ async def analysis_stream(
                     yield sse_event("channel_result", result.dict())
 
                 elif channel == "voice":
-                    result = await run_voice_engine(inp, channel=kwargs.get("channel", "voice"))
+                    result = await run_voice_engine(
+                        inp,
+                        channel=kwargs.get("channel", "voice"),
+                        file_content=file_content,
+                    )
                     channel_results.append(result)
                     yield sse_event("channel_result", result.dict())
 
@@ -234,7 +235,7 @@ async def persist_analysis(
             "id": analysis_id,
             "session_id": session_id,
             "user_id": user_id,
-            "input_type": str(request.type),
+            "input_type": request.type.value,
             "raw_input": request.input[:10000],   # truncate for storage
             "final_verdict": verdict.verdict,
             "confidence": verdict.confidence,
@@ -257,7 +258,7 @@ async def persist_analysis(
         if verdict.verdict == "phishing":
             for result in channel_results:
                 domain = result.features.get("hostname") or result.features.get("domain")
-                if domain and result.score >= 0.75:
+                if domain and result.score >= 0.95:
                     await upsert_indicator("domain", domain, result.score, source="ml_model")
 
         logger.info(f"Analysis {analysis_id} persisted — verdict: {verdict.verdict}")

@@ -16,6 +16,7 @@ async def init_redis():
         settings.redis_url,
         encoding="utf-8",
         decode_responses=True,
+        ssl_cert_reqs="none" if settings.redis_url.startswith("rediss://") else None
     )
 
 

@@ -17,9 +17,9 @@ backend/.venv/
 .venv/
 
 # ML Models (bahut badi files hoti hain)
-backend/ML_DL_Models/Bert/
+backend/ML_DL_Models/Url/
 backend/ML_DL_Models/DeepFake Voice Detection/
-backend/ML_DL_Models/final/
+backend/ML_DL_Models/Email/
 **/*.pt
 **/*.pth
 **/*.pkl

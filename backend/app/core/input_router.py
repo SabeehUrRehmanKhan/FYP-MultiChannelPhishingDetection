@@ -115,6 +115,7 @@ def build_channel_tasks(request: AnalyzeRequest) -> list[dict]:
     effective_type = request.type
     if effective_type == InputType.auto:
         effective_type = detect_input_type(request.input)
+        request.type = effective_type  # Update request so DB saves correct enum
         logger.info(f"Auto-detected input type: {effective_type}")
 
     if effective_type == InputType.email:

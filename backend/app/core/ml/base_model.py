@@ -26,9 +26,9 @@ class ModelOutput:
     def __post_init__(self):
         # Auto-assign verdict from score if not set
         if not self.verdict:
-            if self.score >= 0.80:
+            if self.score >= 0.95:
                 self.verdict = "phishing"
-            elif self.score >= 0.50:
+            elif self.score >= 0.65:
                 self.verdict = "suspicious"
             else:
                 self.verdict = "legitimate"
@@ -59,9 +59,9 @@ class BasePhishModel(ABC):
         return self._loaded
 
     def _score_to_verdict(self, score: float) -> str:
-        if score >= 0.80:
+        if score >= 0.95:
             return "phishing"
-        elif score >= 0.50:
+        elif score >= 0.65:
             return "suspicious"
         else:
             return "legitimate"

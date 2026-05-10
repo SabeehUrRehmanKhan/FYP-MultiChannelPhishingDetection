@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import {
   GlassCard, VerdictChip, ConfidenceBar, ScanIndicator,
@@ -6,9 +7,12 @@ import {
 } from '../components/ui/UIComponents';
 import { streamAnalysis } from '../lib/sse';
 import type { SSEChannelResult, SSEFinalVerdict, SSEThreatHit } from '../lib/sse';
+import { ChannelEvidenceCard } from '../components/analysis/ChannelEvidenceCard';
+import { ScreenshotEvidence } from '../components/analysis/ScreenshotEvidence';
+import { VoiceAnalysis } from '../components/analysis/VoiceAnalysis';
 import './DashboardPage.css';
 
-import { Link2, Mail, Globe, Brain, Mic, Paperclip, AlertTriangle, Square, Hexagon, Loader2, CornerDownRight } from 'lucide-react';
+import { Link2, Mail, Globe, Brain, Mic, Paperclip, AlertTriangle, Square, Hexagon, Loader2, Shield } from 'lucide-react';
 
 const CHANNEL_ICONS: Record<string, React.ReactNode> = {
   url: <Link2 size={24} />, 
@@ -20,6 +24,7 @@ const CHANNEL_ICONS: Record<string, React.ReactNode> = {
 
 export function DashboardPage() {
   const { token } = useAuth();
+  const navigate = useNavigate();
 
   const [input, setInput] = useState('');
   const [file, setFile] = useState<File | null>(null);
@@ -242,53 +247,57 @@ export function DashboardPage() {
         </div>
       )}
 
-      {/* Channel results */}
+      {/* Channel Evidence Cards */}
       {Object.keys(channels).length > 0 && (
         <div className="animate-fade-in" style={{ marginBottom: '32px' }}>
-          <div className="label-caps" style={{ color: 'var(--on-surface-variant)', marginBottom: 20 }}>
-            Active Neural Channels
+          <div className="label-caps" style={{ color: 'var(--on-surface-variant)', marginBottom: 20, display: 'flex', alignItems: 'center', gap: 8 }}>
+            <Shield size={14} /> Active Neural Channels — Real-Time Evidence
+            <div style={{ marginLeft: 'auto', display: 'flex', gap: 8, opacity: 0.5 }}>
+              {Object.keys(CHANNEL_ICONS).map(k => <span key={k}>{CHANNEL_ICONS[k]}</span>)}
+            </div>
           </div>
-          <div className="dashboard__channels-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
+          <div className="dashboard__channels-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(380px, 1fr))', gap: '20px' }}>
             {Object.values(channels).map(ch => (
-              <GlassCard key={ch.channel} className="dashboard__channel-card animate-slide-in" style={{ padding: '20px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <div style={{ color: 'var(--electric-blue)' }}>{CHANNEL_ICONS[ch.channel] || <Hexagon size={24} />}</div>
-                    <span style={{ fontFamily: 'var(--font-headline)', fontWeight: 700, textTransform: 'uppercase', fontSize: '13px', letterSpacing: '1px' }}>
-                      {ch.channel}
-                    </span>
-                  </div>
-                  <VerdictChip verdict={ch.verdict} />
-                </div>
-                <ConfidenceBar value={ch.score} verdict={ch.verdict} />
-                
-                {ch.cascade_skipped && (
-                  <div style={{ 
-                    background: 'rgba(255, 179, 0, 0.1)', 
-                    color: 'var(--amber)', 
-                    fontSize: '11px', 
-                    padding: '4px 8px', 
-                    borderRadius: '4px',
-                    marginTop: '12px',
-                    display: 'inline-block'
-                  }}>
-                    <CornerDownRight size={10} style={{ marginRight: 4 }} /> Cascade Skip: URL threat sufficient
-                  </div>
-                )}
-                
-                {Object.keys(ch.features).length > 0 && !ch.cascade_skipped && (
-                  <div className="dashboard__channel-features" style={{ marginTop: '16px', borderTop: '1px solid var(--outline-variant)', paddingTop: '12px' }}>
-                    {Object.entries(ch.features).slice(0, 4).map(([k, v]) => (
-                      <div key={k} className="dashboard__feature-row" style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', marginBottom: '4px' }}>
-                        <span style={{ color: 'var(--on-surface-variant)' }}>{k}</span>
-                        <span style={{ color: 'var(--on-surface)', fontWeight: 500 }}>{String(v)}</span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </GlassCard>
+              <div key={ch.channel} className="animate-slide-in">
+                <ChannelEvidenceCard
+                  channel={ch.channel}
+                  score={ch.score}
+                  verdict={ch.verdict}
+                  confidence={ch.confidence}
+                  features={ch.features as Record<string, unknown>}
+                  processingTimeMs={ch.processing_time_ms}
+                />
+              </div>
             ))}
           </div>
+
+          {/* Screenshot Evidence — shows when web channel completes */}
+          {channels.web && channels.web.features && (
+            <div style={{ marginTop: 24 }} className="animate-slide-in">
+              <ScreenshotEvidence
+                screenshotUrl={(channels.web.features as Record<string, unknown>).screenshot_url as string}
+                domFeatures={(channels.web.features as Record<string, unknown>).dom_features as Record<string, unknown>}
+                brandSignals={(channels.web.features as Record<string, unknown>).brand_signals as Record<string, unknown>}
+                suspiciousElements={(channels.web.features as Record<string, unknown>).suspicious_elements as Array<{selector: string; reason: string; severity: string}>}
+                redirectChain={(channels.web.features as Record<string, unknown>).redirect_chain as string[]}
+                sslInfo={(channels.web.features as Record<string, unknown>).ssl_info as {valid: boolean; issuer: string}}
+                finalUrl={(channels.web.features as Record<string, unknown>).final_url as string}
+              />
+            </div>
+          )}
+
+          {/* Voice Deepfake Analysis — shows when voice channel completes */}
+          {channels.voice && channels.voice.features && (channels.voice.features as Record<string, unknown>).analysis_type === 'deepfake_audio' && (
+            <div style={{ marginTop: 24 }} className="animate-slide-in">
+              <VoiceAnalysis
+                scores={(channels.voice.features as Record<string, unknown>).scores as {acoustic_clarity: number; prosody_analysis: number; neural_transformer: number}}
+                verdictLabel={(channels.voice.features as Record<string, unknown>).verdict_label as string}
+                durationSec={(channels.voice.features as Record<string, unknown>).duration_sec as number}
+                acousticRulesHit={(channels.voice.features as Record<string, unknown>).acoustic_rules_hit as string[]}
+                analysisType={(channels.voice.features as Record<string, unknown>).analysis_type as string}
+              />
+            </div>
+          )}
         </div>
       )}
 
@@ -307,23 +316,26 @@ export function DashboardPage() {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 24 }}>
             <div style={{ flex: 1, minWidth: '300px' }}>
               <div className="label-caps" style={{ color: 'var(--on-surface-variant)', marginBottom: 12 }}>Consolidated Neural Verdict</div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
-                <div style={{ 
-                  fontSize: 56, 
-                  fontFamily: 'var(--font-headline)', 
-                  fontWeight: 800,
-                  color: verdictColor[finalVerdict.verdict],
-                  lineHeight: 1
-                }}>
-                  {Math.round(finalVerdict.confidence * 100)}%
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                  <div style={{ 
+                    fontSize: 56, 
+                    fontFamily: 'var(--font-headline)', 
+                    fontWeight: 800,
+                    color: verdictColor[finalVerdict.verdict],
+                    lineHeight: 1
+                  }}>
+                    {Math.round(finalVerdict.confidence * 100)}%
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                    <VerdictChip verdict={finalVerdict.verdict} />
+                    <div style={{ fontSize: 13, color: 'var(--on-surface-variant)' }}>
+                      Neural confidence based on {finalVerdict.channels_run.length} channels
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--on-surface)' }}>
-                    {finalVerdict.verdict.toUpperCase()}
-                  </div>
-                  <div style={{ fontSize: 13, color: 'var(--on-surface-variant)' }}>
-                    Detection confidence based on {finalVerdict.channels_run.length} channels
-                  </div>
+                <div style={{ maxWidth: 400 }}>
+                  <ConfidenceBar value={finalVerdict.confidence} verdict={finalVerdict.verdict} />
                 </div>
               </div>
               <div style={{ 
@@ -339,8 +351,20 @@ export function DashboardPage() {
               </div>
             </div>
             <div style={{ display: 'flex', gap: 12 }}>
-              <button className="btn btn-ghost" style={{ padding: '12px 24px' }}>View Full Forensic Report</button>
-              <button className="btn btn-primary" style={{ padding: '12px 24px' }}>Whitelist Domain</button>
+              <button 
+                className="btn btn-ghost" 
+                style={{ padding: '12px 24px' }}
+                onClick={() => navigate(`/history/${finalVerdict.analysis_id}`)}
+              >
+                View Full Forensic Report
+              </button>
+              <button 
+                className="btn btn-primary" 
+                style={{ padding: '12px 24px' }}
+                onClick={() => navigate(`/history/${finalVerdict.analysis_id}`)}
+              >
+                Submit Feedback / Whitelist
+              </button>
             </div>
           </div>
         </GlassCard>

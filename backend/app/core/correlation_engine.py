@@ -186,9 +186,9 @@ def aggregate_final_score(channel_results: List[ChannelResult]) -> tuple[float, 
     if max_score >= 0.90:
         final_score = max(final_score, max_score * 0.95)
 
-    if final_score >= 0.70:
+    if final_score >= 0.95:
         verdict = "phishing"
-    elif final_score >= 0.45:
+    elif final_score >= 0.65:
         verdict = "suspicious"
     elif final_score >= 0.0:
         verdict = "legitimate"

@@ -324,3 +324,25 @@ CREATE POLICY "admin_manage_activities" ON awareness_activities
 -- User progress: own records only
 CREATE POLICY "own_progress" ON user_progress
   FOR ALL USING (auth.uid() = user_id);
+
+-- ============================================================
+-- 12. STORAGE BUCKETS
+-- ============================================================
+
+-- Create a bucket for screenshots
+INSERT INTO storage.buckets (id, name, public) 
+VALUES ('screenshots', 'screenshots', true)
+ON CONFLICT (id) DO NOTHING;
+
+-- Allow public read access to screenshots
+CREATE POLICY "Public Access" 
+ON storage.objects FOR SELECT 
+USING (bucket_id = 'screenshots');
+
+-- Allow authenticated users to upload screenshots
+CREATE POLICY "Auth Uploads" 
+ON storage.objects FOR INSERT 
+WITH CHECK (
+    bucket_id = 'screenshots' 
+    AND auth.role() = 'authenticated'
+);

@@ -60,9 +60,10 @@ class ChannelResult(BaseModel):
     score: float                          # 0.0 - 1.0 phishing probability
     verdict: Verdict
     confidence: float
-    features: Dict[str, Any] = {}         # ⚠️ MODEL CHANGE POINT: structure changes per model
+    features: Dict[str, Any] = {}         # Structure varies per model type
     processing_time_ms: int
     cascade_skipped: bool = False
+    screenshot_url: Optional[str] = None  # Web engine: screenshot URL
 
 
 class ThreatIndicatorHit(BaseModel):
@@ -71,6 +72,71 @@ class ThreatIndicatorHit(BaseModel):
     threat_score: float
     verified: bool
     report_count: int
+
+
+# ─────────────────────────────────────────────
+# Web Engine — Screenshot Evidence
+# ─────────────────────────────────────────────
+
+class SuspiciousElement(BaseModel):
+    selector: str
+    reason: str
+    severity: str = "medium"              # high | medium | low
+
+
+class DOMFeatures(BaseModel):
+    has_password_field: bool = False
+    has_hidden_iframe: bool = False
+    external_js_count: int = 0
+    form_action_external: bool = False
+    meta_refresh: bool = False
+    hidden_elements_count: int = 0
+    obfuscated_js: bool = False
+    total_forms: int = 0
+    total_inputs: int = 0
+    total_links: int = 0
+
+
+class BrandSignals(BaseModel):
+    detected_brand: Optional[str] = None
+    title_text: str = ""
+    favicon_url: str = ""
+    domain_matches_brand: bool = True
+
+
+class ScreenshotEvidence(BaseModel):
+    screenshot_url: Optional[str] = None
+    annotated_screenshot_url: Optional[str] = None
+    dom_features: DOMFeatures = DOMFeatures()
+    brand_signals: BrandSignals = BrandSignals()
+    suspicious_elements: List[SuspiciousElement] = []
+    redirect_chain: List[str] = []
+    ssl_valid: bool = False
+
+
+# ─────────────────────────────────────────────
+# Voice Engine — Deepfake Analysis Detail
+# ─────────────────────────────────────────────
+
+class VoiceStageScores(BaseModel):
+    acoustic_clarity: float = 0.0
+    prosody_analysis: float = 0.0
+    neural_transformer: float = 0.0
+
+
+class FakeSegment(BaseModel):
+    start: str
+    end: str
+    probability: float
+
+
+class VoiceAnalysisDetail(BaseModel):
+    analysis_type: str = "deepfake_audio"   # deepfake_audio | text_only
+    verdict_label: str = "REAL"             # FAKE | REAL
+    duration_sec: float = 0.0
+    scores: VoiceStageScores = VoiceStageScores()
+    acoustic_rules_hit: List[str] = []
+    fake_segments: List[FakeSegment] = []
 
 
 class CorrelationUpdate(BaseModel):
@@ -90,6 +156,8 @@ class FinalVerdict(BaseModel):
     total_time_ms: int
     threat_indicator_hits: List[ThreatIndicatorHit] = []
     correlation: Optional[CorrelationUpdate] = None
+    screenshot_evidence: Optional[ScreenshotEvidence] = None
+    voice_analysis: Optional[VoiceAnalysisDetail] = None
 
 
 # SSE event wrapper

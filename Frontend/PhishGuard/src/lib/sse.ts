@@ -1,20 +1,62 @@
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 export interface SSEChannelResult {
-  channel: string; score: number; verdict: string;
-  features: Record<string, unknown>; cascade_skipped: boolean;
+  channel: string;
+  score: number;
+  verdict: string;
+  confidence: number;
+  features: Record<string, unknown>;
+  cascade_skipped: boolean;
+  processing_time_ms: number;
+  screenshot_url?: string;
 }
+
 export interface SSEThreatHit {
-  indicator_type: string; value: string; threat_score: number; verified: boolean;
+  indicator_type: string;
+  value: string;
+  threat_score: number;
+  verified: boolean;
+  report_count: number;
 }
+
 export interface SSECorrelation {
-  level: string; signal_type: string; evidence: unknown; affected_domains: string[];
+  level: string;
+  signal_type: string;
+  evidence: unknown;
+  affected_domains: string[];
 }
+
 export interface SSEFinalVerdict {
-  verdict: string; confidence: number; analysis_id: string;
-  channels_run: string[]; total_time_ms: number;
+  verdict: string;
+  confidence: number;
+  analysis_id: string;
+  channels_run: string[];
+  total_time_ms: number;
+  cascade_skipped: boolean;
+  screenshot_evidence?: {
+    screenshot_url?: string;
+    annotated_screenshot_url?: string;
+    dom_features: Record<string, unknown>;
+    brand_signals: Record<string, unknown>;
+    suspicious_elements: Array<{ selector: string; reason: string; severity: string }>;
+    redirect_chain: string[];
+    ssl_valid: boolean;
+  };
+  voice_analysis?: {
+    analysis_type: string;
+    verdict_label: string;
+    duration_sec: number;
+    scores: { acoustic_clarity: number; prosody_analysis: number; neural_transformer: number };
+    acoustic_rules_hit: string[];
+    fake_segments: Array<{ start: string; end: string; probability: number }>;
+  };
 }
-export interface SSEError { channel: string; message: string; recoverable: boolean; }
+
+export interface SSEError {
+  channel: string;
+  message: string;
+  recoverable: boolean;
+}
 
 export type SSEEventHandler = {
   onChannelResult?: (data: SSEChannelResult) => void;

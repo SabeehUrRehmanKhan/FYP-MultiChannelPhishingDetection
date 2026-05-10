@@ -21,14 +21,19 @@ class Settings(BaseSettings):
     rate_limit_analyses_per_minute: int = 20
     rate_limit_feedback_per_hour: int = 50
 
-    # ⚠️  MODEL CHANGE POINT:
-    # Toggle this to false when real models are placed in ml_models/
+    # Model toggle
     use_mock_models: bool = True
 
-    roberta_model_path: str = "./ml_models/roberta/"
-    url_model_path: str = "./ml_models/url_xgb_bilstm/"
-    web_model_path: str = "./ml_models/web_xgb_phash/"
+    # Model paths — point to ML_DL_Models/ subdirectories
+    roberta_model_path: str = "./ML_DL_Models/Email/"
+    url_model_path: str = "./ML_DL_Models/Url/"
+    web_model_path: str = "./ML_DL_Models/Web/"
+    voice_model_path: str = "./ML_DL_Models/DeepFake Voice Detection/"
     whisper_model_size: str = "base"
+
+    # Web analysis config
+    screenshot_bucket: str = "screenshots"
+    playwright_timeout_ms: int = 15000
 
     # Cascade: skip web engine if URL score >= threshold
     cascade_threshold: float = 0.90
